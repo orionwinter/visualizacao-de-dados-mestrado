@@ -1,0 +1,72 @@
+---
+title: "Extraindo os dados"
+output: html_notebook
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(jsonlite)
+```
+
+Importando os dados
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+artigos <- read_csv("ethnicity-gender-cs/papers.csv", col_names = FALSE)
+autores <- read_csv("ethnicity-gender-cs/authors.csv", col_names = FALSE)
+conferencias <- read_csv("ethnicity-gender-cs/conferences.csv", col_names = FALSE)
+etnias <- read_csv("ethnicity-gender-cs/ethnicity.csv", col_names = FALSE)
+```
+
+Renomeando colunas:
+
+```{r}
+artigos <- artigos %>% 
+  rename(
+    global_key = X1,
+    paper_key = X2,
+    conf_key = X3,
+    link = X4,
+    title = X5,
+    pages = X6,
+    citations = X7
+  )
+
+autores <- autores %>% 
+  rename(
+    key = X1,
+    position_of_author = X2,
+    full_name = X3
+  )
+
+conferencias <- conferencias %>% 
+  rename(
+    global_key = X1,
+    conf_key = X2,
+    year = X3,
+    publisher = X4,
+    title = X5,
+    link = X6,
+    cs = X7,
+    de = X8,
+    se = X9,
+    th = X10
+  )
+
+etnias <- etnias %>% 
+  rename(
+    name = X1,
+    l0 = X2,
+    l1 = X3,
+    l2 = X4,
+    gender = X5
+  )
+```
+
+Salvando JSON:
+
+```{r}
+conferencias %>% 
+  toJSON() %>% 
+  write_lines("output.json")
+```
+
