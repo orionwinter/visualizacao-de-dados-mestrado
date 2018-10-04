@@ -5,7 +5,6 @@ output: html_notebook
 
 ```{r, echo=FALSE}
 library(tidyverse)
-library(jsonlite)
 ```
 
 Importando os dados
@@ -33,7 +32,7 @@ artigos <- artigos %>%
 
 autores <- autores %>% 
   rename(
-    key = X1,
+    paper_key = X1,
     position_of_author = X2,
     full_name = X3
   )
@@ -62,11 +61,34 @@ etnias <- etnias %>%
   )
 ```
 
-Salvando JSON:
+Obtendo número de homens e mulheres para cada área da Ciência da Computação:
 
 ```{r}
-conferencias %>% 
-  toJSON() %>% 
-  write_lines("output.json")
+generos_por_area <- autores %>% 
+  left_join(etnias, by = c("full_name" = "name")) %>% 
+  left_join(artigos, by = "paper_key") %>% 
+  left_join(conferencias, by = "conf_key") %>% 
+  filter(gender != "-") %>% 
+  select(gender, cs, de, se, th) %>% 
+  gather(area, count, cs:th) %>% 
+  filter(count == 1) %>% 
+  group_by(area, gender) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  spread(gender, count) %>% 
+  mutate(
+      male_proportion = M / (M + F),
+      female_proportion = F / (M + F)
+    ) %>%
+  gather(gender, proportion, male_proportion:female_proportion) %>% 
+  select(-M, -F)
+
+generos_por_area %>% 
+  ggplot(aes(x = area, y = proportion, fill = gender)) +
+    geom_bar(stat = "identity", position = "dodge")
+
+write_csv(generos_por_area, "generos_por_area.csv")
 ```
+
 
