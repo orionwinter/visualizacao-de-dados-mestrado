@@ -91,4 +91,28 @@ generos_por_area %>%
 write_csv(generos_por_area, "generos_por_area.csv")
 ```
 
+Obtendo a porcentagem dos primeiros autores nos artigos por gênero ao longo dos anos:
+
+```{r}
+posicao_por_genero <- autores %>% 
+  left_join(etnias, by = c("full_name" = "name")) %>%
+  left_join(artigos, by = "paper_key") %>% 
+  left_join(conferencias, by = "conf_key") %>% 
+  filter(gender != "-", position_of_author == 0) %>% 
+  group_by(year) %>% 
+  summarise(
+    men_count = sum(gender == "M"),
+    women_count = sum(gender == "F"),
+    men_percentage = men_count / (men_count + women_count),
+    women_percentage = women_count / (men_count + women_count)
+  ) %>% 
+  select(-men_count, -women_count) %>% 
+  gather(gender, percentage, men_percentage:women_percentage)
+
+posicao_por_genero %>% 
+  ggplot(aes(x = year, y = percentage, color = gender)) +
+    geom_line()
+
+write_csv(posicao_por_genero, "posicao_por_genero.csv")
+```
 
