@@ -116,3 +116,23 @@ posicao_por_genero %>%
 write_csv(posicao_por_genero, "posicao_por_genero.csv")
 ```
 
+```{r}
+proporcao_mulheres_por_etnia <- autores %>% 
+  left_join(etnias, by = c("full_name" = "name")) %>%
+  left_join(artigos, by = "paper_key") %>% 
+  left_join(conferencias, by = "conf_key") %>% 
+  filter(gender != "-", position_of_author == 0) %>% 
+  group_by(year, l2) %>% 
+  summarise(
+    total = n(),
+    women_count = sum(gender == "F"),
+    women_proportion = women_count / total
+  ) %>% 
+  select(-total, -women_count) %>%
+  rename(
+    ethnicity = l2
+  )
+  
+write_csv(proporcao_mulheres_por_etnia, "proporcao_mulheres_por_etnia.csv")
+```
+
